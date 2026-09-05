@@ -110,7 +110,8 @@ export async function buildProviderCatalog(
         : ["text"],
       // OpenClaw display metadata only. Buyer Runtime uses request-bound integer quotes.
       cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-      contextWindow: Math.max(model.maxOutputTokens, 8_192),
+      // Output budget is not context size. The host permits unknown context metadata;
+      // leave it absent until discovery advertises a verified provider context window.
       maxTokens: model.maxOutputTokens,
     })),
   };

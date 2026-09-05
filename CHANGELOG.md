@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Load the chat picker from a mixed text/image/audio proxy catalog without rejecting valid media entries.
+- Reject duplicate chat IDs and malformed endpoint lists.
+- Keep the catalog timeout active until the response body finishes downloading.
+- Stop misreporting the model's output-token budget as its context window.
+- Preserve stable turn idempotency and no-store behavior; no wallet or payment implementation changes.
+
 ## 0.2.0 - 2026-09-04
 
 - Updated the managed Onchain Router buyer proxy dependency to stable npm release `0.2.0`.

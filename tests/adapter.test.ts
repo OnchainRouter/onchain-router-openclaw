@@ -321,6 +321,8 @@ describe("Onchain Router OpenClaw adapter", () => {
       models: [{ id: "gemini-2.5-flash", input: ["text", "image"] }],
     });
     expect(JSON.stringify(catalog.models)).not.toContain(TOKEN);
+    expect(catalog.models?.[0]).not.toHaveProperty("contextWindow");
+    expect(catalog.models?.[0]?.maxTokens).toBe(8192);
   });
 });
 
