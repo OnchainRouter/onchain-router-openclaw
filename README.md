@@ -97,6 +97,10 @@ managed proxy:     true
 Choose an `onchain-router/<model-id>` entry returned by the live picker. The Buyer Runtime still
 enforces its model, amount, session, hourly, daily, recipient, network, and confirmation policy.
 
+The chat picker filters out image and audio entries from the same multimodal catalog. Output-token
+limits are not reported as context-window sizes: absent verified context metadata, that optional
+host field is left unset. The catalog request is bounded through the full response download.
+
 Inside OpenClaw, use `/onchain-router help`. The native agent tools are:
 
 | Tool | Cost | Purpose |

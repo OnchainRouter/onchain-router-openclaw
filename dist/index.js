@@ -39,36 +39,49 @@ async function fetchProxyModels(origin, token, fetchImplementation = globalThis.
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 1e4);
   timer.unref();
-  let response;
+  let value;
   try {
-    response = await fetchImplementation(`${origin}/v1/models`, {
+    const response = await fetchImplementation(`${origin}/v1/models`, {
       method: "GET",
       headers: { accept: "application/json", authorization: `Bearer ${token}` },
       redirect: "error",
       signal: controller.signal
     });
+    if (!response.ok)
+      throw new Error(`buyer proxy catalog returned HTTP ${response.status}`);
+    value = await boundedJson(response);
   } finally {
     clearTimeout(timer);
   }
-  if (!response.ok) throw new Error(`buyer proxy catalog returned HTTP ${response.status}`);
-  const value = await boundedJson(response);
   if (typeof value !== "object" || value === null || !Array.isArray(value.data))
     throw new Error("buyer proxy catalog is malformed");
   const models = [];
   for (const item of value.data) {
-    if (typeof item !== "object" || item === null) throw new Error("buyer proxy model is malformed");
-    const entry = item;
-    if (typeof entry["id"] !== "string" || !MODEL.test(entry["id"]) || !Array.isArray(entry["supported_endpoints"]) || !entry["supported_endpoints"].includes("/v1/chat/completions"))
+    if (typeof item !== "object" || item === null)
       throw new Error("buyer proxy model is malformed");
+    const entry = item;
+    if (typeof entry["id"] !== "string" || !MODEL.test(entry["id"]) || !Array.isArray(entry["supported_endpoints"]) || !entry["supported_endpoints"].every(
+      (endpoint) => typeof endpoint === "string"
+    ))
+      throw new Error("buyer proxy model is malformed");
+    if (!entry["supported_endpoints"].includes("/v1/chat/completions"))
+      continue;
+    if (models.some((model) => model.id === entry["id"]))
+      throw new Error("buyer proxy model is duplicated");
     const rawMaximum = entry["max_output_tokens"];
     const maximum = typeof rawMaximum === "number" ? rawMaximum : typeof rawMaximum === "string" && /^\d+$/.test(rawMaximum) ? Number(rawMaximum) : 8192;
     if (!Number.isSafeInteger(maximum) || maximum < 1 || maximum > 1e6)
       throw new Error("buyer proxy model output limit is invalid");
-    const capabilities = Array.isArray(entry["capabilities"]) ? entry["capabilities"].filter((item2) => typeof item2 === "string") : ["text"];
+    const capabilities = Array.isArray(entry["capabilities"]) ? entry["capabilities"].filter(
+      (item2) => typeof item2 === "string"
+    ) : ["text"];
     models.push({ id: entry["id"], capabilities, maxOutputTokens: maximum });
   }
-  if (models.length === 0) throw new Error("buyer proxy exposes no chat models");
-  return Object.freeze(models.sort((left, right) => left.id.localeCompare(right.id)));
+  if (models.length === 0)
+    throw new Error("buyer proxy exposes no chat models");
+  return Object.freeze(
+    models.sort((left, right) => left.id.localeCompare(right.id))
+  );
 }
 
 // src/config.ts
@@ -790,7 +803,8 @@ async function buildProviderCatalog(config, dependencies = {}) {
       input: model.capabilities.includes("vision") ? ["text", "image"] : ["text"],
       // OpenClaw display metadata only. Buyer Runtime uses request-bound integer quotes.
       cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-      contextWindow: Math.max(model.maxOutputTokens, 8192),
+      // Output budget is not context size. The host permits unknown context metadata;
+      // leave it absent until discovery advertises a verified provider context window.
       maxTokens: model.maxOutputTokens
     }))
   };
