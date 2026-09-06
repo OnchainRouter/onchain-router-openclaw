@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.2.1 - 2026-09-06
+
+- Publish the already-merged catalog correction in a new immutable Git install release.
+- Keep the underlying CLI/proxy npm packages at 0.2.0; no wallet or spending-policy changes.
+
 - Load the chat picker from a mixed text/image/audio proxy catalog without rejecting valid media entries.
 - Reject duplicate chat IDs and malformed endpoint lists.
 - Keep the catalog timeout active until the response body finishes downloading.

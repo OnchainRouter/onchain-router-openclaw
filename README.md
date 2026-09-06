@@ -6,7 +6,7 @@ connects OpenClaw to the authenticated OpenAI-compatible proxy on `127.0.0.1`.
 
 ## Release status
 
-Version `0.2.0` is the stable public release. The source is public and installable directly from the
+Version `0.2.1` is the stable public release. The source is public and installable directly from the
 versioned GitHub release. Installation, build, and fake-loopback tests do not unlock a wallet, make
 a paid request, deploy a service, or spend USDC. Funded OpenClaw acceptance remains an explicit
 operator test because it spends from the operator's Buyer Runtime wallet.
@@ -45,11 +45,11 @@ proxy bearer.
 
 ## Install
 
-Review the [security model](./SECURITY.md), then install the immutable `v0.2.0` release with
+Review the [security model](./SECURITY.md), then install the immutable `v0.2.1` release with
 OpenClaw's native plugin manager:
 
 ```bash
-openclaw plugins install git:github.com/OnchainRouter/onchain-router-openclaw@v0.2.0 --force
+openclaw plugins install git:github.com/OnchainRouter/onchain-router-openclaw@v0.2.1 --force
 openclaw plugins enable onchain-router --accept-capabilities
 openclaw plugins inspect onchain-router --runtime --json
 ```
